@@ -147,7 +147,7 @@ def main():
 
     # TODO: this currently works for host_collections. make it work with lifecycle environments, host groups etc. 
     # note that hosts in a host collection called "Locked" will be excluded. useful if there are certain hosts that you don't want to patch, but still have in the same host collection.
-    hosts_json = get_with_json(api + "hosts", json.dumps({"search": "host_collection = " + args.host_collection + " and !(host_collection = Locked)", "per_age": "10000"}))["results"]
+    hosts_json = get_with_json(api + "hosts", json.dumps({"search": "host_collection = \"" + args.host_collection + "\" and !(host_collection = Locked)", "per_age": "10000"}))["results"]
 
     for host in hosts_json:
         # Get all erratas for this host
