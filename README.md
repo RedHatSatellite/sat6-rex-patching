@@ -2,7 +2,7 @@
 
 Script to schedule remote execution jobs for installing available errata and reboot after updates that require reboot. 
 
-## Example usage:
+## Example usage
 
 Copy the script to your Satellite server (if you want to run it from another server, you have to change the URL in the code from "localhost" to your Satellite hostname).
 
