@@ -13,18 +13,8 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 # To setup hosts for remote execution:
 # curl https://sat6.example.com:9090/ssh/pubkey >> ~/.ssh/authorized_keys
 
-# Satellite parameters
-url = "https://localhost/"
-api = url + "api/"
-katello_api = url + "katello/api/"
-post_headers = {'content-type': 'application/json'}
-ssl_verify = False
-
-errata_job_name = "Install Errata - Katello SSH Default"
-power_job_name = "Power Action - SSH Default"
-command_job_name = "Run Command - SSH Default"
-
 parser = ArgumentParser(description="Script to schedule remote execution jobs for installing available errata and reboot after updates that require reboot.")
+parser.add_argument("-s", "--satellite", dest="satellite", required=True, help="The FQDN of the Satellite server, e.g. \"sat6.example.com\"")
 parser.add_argument("-u", "--username", dest="username", required=True, help="Username to authenticate to Satellite API")
 parser.add_argument("-p", "--password", dest="password", required=True, help="Password to authenticate to Satellite API")
 parser.add_argument("-o", "--organization", dest="organization", required=True, help="Organization name in Satellite")
@@ -33,6 +23,17 @@ parser.add_argument("-t", "--apply-time", dest="apply_time", required=True, help
 parser.add_argument("-r", "--reboot-time", dest="reboot_time", required=True, help="The time that you want to schedule reboots for the hosts that require it, format: 2017-11-11 12:12:12")
 parser.add_argument("-a", "--apply", action="store_true", default=False, dest="do_apply", help="Actually schedule the jobs (otherwise the script will run in no-op)")
 args = parser.parse_args()
+
+# Satellite parameters
+api = "https://" + args.satellite + "/api/"
+katello_api = "https://" + args.satellite + "/katello/api/"
+post_headers = {'content-type': 'application/json'}
+ssl_verify = True
+
+errata_job_name = "Install Errata - Katello SSH Default"
+power_job_name = "Power Action - SSH Default"
+command_job_name = "Run Command - SSH Default"
+
 
 
 def get_json(location):
@@ -168,7 +169,7 @@ def main():
             job_json = json.dumps({
                 "job_invocation": {
                     "job_template_id": str(errata_job_id),  
-                    "targeting_type": "dynamic_query",
+                    "targeting_type": "static_query",
                     "search_query": "name = " + host["name"],
                     "inputs": {
                         "errata": ",".join(errata_ids)
@@ -191,7 +192,7 @@ def main():
             job_json = json.dumps({
                 "job_invocation": {
                     "job_template_id": str(power_job_id),
-                    "targeting_type": "dynamic_query",
+                    "targeting_type": "static_query",
                     "search_query": "name = " + host["name"],
                     "inputs": {
                         "action": "restart"
